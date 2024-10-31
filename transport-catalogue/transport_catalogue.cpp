@@ -21,24 +21,24 @@ void TransportCatalogue::AddStop(const string& name, const geo::Coordinates& coo
     routes_of_stops_[stops_.back().name];
 }
 
-const TransportCatalogue::Route* TransportCatalogue::FindRoute(const string& name) const {
+TransportCatalogue::constRoutePtr TransportCatalogue::FindRoute(const string& name) const {
     return names_of_routes_.count(name) ? names_of_routes_.at(name) : nullptr;
 }
 
-const TransportCatalogue::Stop* TransportCatalogue::FindStop(const string& name) const {
+TransportCatalogue::constStopPtr TransportCatalogue::FindStop(const string& name) const {
     return names_of_stops_.count(name) ? names_of_stops_.at(name) : nullptr;
 }
 
-const tuple<size_t, size_t, double> TransportCatalogue::GetRoute(const string& name) const {
+const TransportCatalogue::RouteStat TransportCatalogue::GetRoute(const string& name) const {
     const Route* route = FindRoute(name);
     return { route->stops.size(), unordered_set<string_view>(route->stops.begin(), route->stops.end()).size() , ComputeRouteLength(route)};
 }
 
-const std::set<std::string_view> TransportCatalogue::GetStop(const string& name) const {
-    return routes_of_stops_.at(name);
+const std::set<std::string_view> TransportCatalogue::GetRoutesOfStop(const string& name_of_stop) const {
+    return routes_of_stops_.at(name_of_stop);
 }
 
-double TransportCatalogue::ComputeRouteLength(const Route* route) const {
+double TransportCatalogue::ComputeRouteLength(constRoutePtr route) const {
     double route_length = 0;
     for (auto it = route->stops.begin(); it != route->stops.end()-1; it++) {
         route_length += ComputeDistance(FindStop(*it)->coordinates, FindStop(*next(it))->coordinates);

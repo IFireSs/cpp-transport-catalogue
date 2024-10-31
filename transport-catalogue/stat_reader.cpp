@@ -18,7 +18,7 @@ void transport::stat::ParseAndPrint(const core::TransportCatalogue& transport_ca
     }
     else if (request_type == "Stop") {
         if (transport_catalogue.FindStop(name)) {
-            std::set<std::string_view> routes = transport_catalogue.GetStop(name);
+            std::set<std::string_view> routes = transport_catalogue.GetRoutesOfStop(name);
             if (!routes.empty()) {
                 output << "Stop " << name << ": buses";
                 for (auto& route : routes) {

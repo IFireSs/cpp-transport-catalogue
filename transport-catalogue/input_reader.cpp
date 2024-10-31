@@ -105,11 +105,13 @@ void input::Reader::ParseLine(std::string_view line) {
 
 void input::Reader::ApplyCommands([[maybe_unused]] core::TransportCatalogue& catalogue) const {
     for (const auto& command : commands_) {
+        if (command.command == "Stop") {
+            catalogue.AddStop(command.id, ParseCoordinates(command.description));
+        } 
+    }
+    for (const auto& command : commands_) {
         if (command.command == "Bus") {
             catalogue.AddRoute(command.id, ParseRoute(command.description));
         }
-        else if (command.command == "Stop") {
-            catalogue.AddStop(command.id, ParseCoordinates(command.description));
-        } 
     }
 }
