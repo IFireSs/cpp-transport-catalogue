@@ -7,11 +7,11 @@ void transport::stat::ParseAndPrint(const core::TransportCatalogue& transport_ca
     std::ostream& output) {
     size_t space = request.find(' ');
     auto request_type = request.substr(0, space);
-    std::string name = std::string(request.substr(space + 1));
+    std::string name = std::string(request.substr(space + 1, request.find_last_not_of(' ') - space));
     if (request_type == "Bus") {
         if (transport_catalogue.FindRoute(name)) {
-            const auto [count_of_stops, count_of_unique_stops, route_length] = transport_catalogue.GetRoute(name);
-            output << "Bus " << name << ": " << count_of_stops << " stops on route, " << count_of_unique_stops << " unique stops, " << std::setprecision(6) << route_length << " route length" << std::endl;
+            const auto [count_of_stops, count_of_unique_stops, route_length,  curvature] = transport_catalogue.GetRoute(name);
+            output << "Bus " << name << ": " << count_of_stops << " stops on route, " << count_of_unique_stops << " unique stops, " << std::setprecision(6) << route_length << " route length, " << std::setprecision(6) << curvature << " curvature"<< std::endl;
             return;
         }
         output << "Bus " << name << ": not found" << std::endl;

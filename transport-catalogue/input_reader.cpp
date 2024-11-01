@@ -74,6 +74,17 @@ std::vector<std::string_view> ParseRoute(std::string_view route) {
 
     return results;
 }
+static void ParseDistance(std::string_view name, std::string_view str, core::TransportCatalogue& catalogue) {
+    std::string_view substr = str.substr(str.find(", ") +2);
+    substr = substr.substr(substr.find(',')+1).substr(substr.find_first_not_of(' ')+1);
+    for (size_t for_break = 0;substr.size() > 0 && for_break != str.npos; for_break = substr.find(", "), substr = substr.substr(for_break + 2)){
+        auto for_int = substr.find('m');
+        if (for_int == str.npos) {
+            break;
+        }
+        catalogue.AddDistance({ catalogue.FindStop(name) , catalogue.FindStop(substr.substr(for_int + 5, substr.find(',') - for_int - 5)) }, std::stoi(std::string(substr.substr(0, for_int))));       
+    }
+}
 
 input::CommandDescription ParseCommandDescription(std::string_view line) {
     auto colon_pos = line.find(':');
@@ -108,6 +119,11 @@ void input::Reader::ApplyCommands([[maybe_unused]] core::TransportCatalogue& cat
         if (command.command == "Stop") {
             catalogue.AddStop(command.id, ParseCoordinates(command.description));
         } 
+    }
+    for (const auto& command : commands_) {
+        if (command.command == "Stop") {
+            ParseDistance(command.id, command.description, catalogue);
+        }
     }
     for (const auto& command : commands_) {
         if (command.command == "Bus") {
