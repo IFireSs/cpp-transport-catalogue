@@ -20,8 +20,8 @@ void TransportCatalogue::AddStop(const string& name, const geo::Coordinates& coo
     names_of_stops_[stops_.back().name] = &stops_.back();
     routes_of_stops_[stops_.back().name];
 }
-void TransportCatalogue::AddDistance(const pairConstStopPtr& pair, const int& distance) {
-    distances_[pair] = distance;
+void TransportCatalogue::AddDistance(constStopPtr first, constStopPtr second, const int& distance) {
+    distances_[{first, second}] = distance;
 }
 
 TransportCatalogue::constRoutePtr TransportCatalogue::FindRoute(const string_view& name) const {

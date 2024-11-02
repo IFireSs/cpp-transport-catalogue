@@ -23,19 +23,19 @@ namespace transport::core {
             geo::Coordinates coordinates;
         };
         struct RouteStat {
-            size_t count_of_stops;
-            size_t count_of_unique_stops;
-            int route_length;
-            double curvature;
+            size_t count_of_stops = 0;
+            size_t count_of_unique_stops = 0;
+            int route_length = 0;
+            double curvature = 0.0;
         };
 
         using constRoutePtr = const Route*;
         using constStopPtr = const Stop*;
-        using pairConstStopPtr = std::pair<constStopPtr, constStopPtr>;
+        
 
         void AddRoute(const std::string& name, const std::vector<std::string_view>& stops);
         void AddStop(const std::string& name, const geo::Coordinates& coordinates);
-        void AddDistance(const pairConstStopPtr& pair, const int& distance);
+        void AddDistance(constStopPtr first, constStopPtr second, const int& distance);
 
         constRoutePtr FindRoute(const std::string_view& name) const;
         constStopPtr FindStop(const std::string_view& name) const;
@@ -44,6 +44,7 @@ namespace transport::core {
         const RouteStat GetRoute(const std::string& name) const;
         const std::set<std::string_view> GetRoutesOfStop(const std::string& name_of_stop) const;
     private:
+        using pairConstStopPtr = std::pair<constStopPtr, constStopPtr>;
         struct Hasher {
             std::size_t operator()(const pairConstStopPtr& pair) const {
                 return std::hash<constStopPtr>{}(pair.first) * 37 + std::hash<constStopPtr>{}(pair.second);

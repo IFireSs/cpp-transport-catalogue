@@ -82,7 +82,7 @@ static void ParseDistance(std::string_view name, std::string_view str, core::Tra
         if (for_int == str.npos) {
             break;
         }
-        catalogue.AddDistance({ catalogue.FindStop(name) , catalogue.FindStop(substr.substr(for_int + 5, substr.find(',') - for_int - 5)) }, std::stoi(std::string(substr.substr(0, for_int))));       
+        catalogue.AddDistance(catalogue.FindStop(name) , catalogue.FindStop(substr.substr(for_int + 5, substr.find(',') - for_int - 5)), std::stoi(std::string(substr.substr(0, for_int))));       
     }
 }
 
