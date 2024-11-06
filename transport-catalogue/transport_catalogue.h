@@ -34,7 +34,7 @@ namespace transport::core {
         int FindDistance(const std::string_view& first, const std::string_view& second) const;
 
         const RouteStat GetRoute(const std::string& name) const;
-        const std::set<std::string> GetRoutesOfStop(const std::string& name_of_stop) const;
+        const std::set<std::string_view> GetRoutesOfStop(const std::string& name_of_stop) const;
     private:
         using pairConstStopPtr = std::pair<constStopPtr, constStopPtr>;
 
@@ -50,7 +50,7 @@ namespace transport::core {
 
         std::unordered_map<std::string_view, constRoutePtr> names_of_routes_;
         std::unordered_map<std::string_view, constStopPtr> names_of_stops_;
-        std::unordered_map<std::string_view, std::set<std::string>> routes_of_stops_;
+        std::unordered_map<std::string_view, std::set<std::string_view>> routes_of_stops_;
 
         double ComputeRouteLength(constRoutePtr route) const;
         int ComputeRouteDistance(constRoutePtr route) const;

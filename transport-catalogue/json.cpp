@@ -235,90 +235,68 @@ namespace json {
         }
     }  // namespace
 
-    Node::Node(std::nullptr_t)
-        : value_(nullptr) {
-    }
-    Node::Node(Array array)
-        : value_(array) {
-    }
-    Node::Node(Dict map)
-        : value_(map) {
-    }
-    Node::Node(int value)
-        : value_(value) {
-    }
-    Node::Node(string value)
-        : value_(value) {
-    }
-    Node::Node(bool value)
-        : value_(value) {
-    }
-    Node::Node(double value)
-        : value_(value) {
-    }
-
-    const Array& Node::AsArray() const {
+    const Array& Node::AsArray() const { 
         if (!IsArray()) {
             throw std::logic_error("");
         }
-        return std::get<Array>(value_);
+        return std::get<Array>(*this);
     }
     const Dict& Node::AsMap() const {
         if (!IsMap()) {
             throw std::logic_error("");
         }
-        return std::get<Dict>(value_);
+        return std::get<Dict>(*this);
     }
     bool Node::AsBool() const {
         if (!IsBool()) {
             throw std::logic_error("");
         }
-        return std::get<bool>(value_);
+        return std::get<bool>(*this);
     }
     int Node::AsInt() const {
         if (!IsInt()) {
             throw std::logic_error("");
         }
-        return std::get<int>(value_);
+        return std::get<int>(*this);
     }
     double Node::AsDouble() const {
         if (!IsDouble()) {
             throw std::logic_error("");
         }
-        return IsPureDouble() ? std::get<double>(value_) : AsInt();
+        return IsPureDouble() ? std::get<double>(*this) : AsInt();
     }
     const string& Node::AsString() const {
         if (!IsString()) {
             throw std::logic_error("");
         }
-        return std::get<std::string>(value_);
-    }
+        return std::get<std::string>(*this);
+    } 
 
     bool Node::IsNull() const {
-        return value_.index() == 0;
+        return (*this).index() == 0;
     };
     bool Node::IsArray() const {
-        return value_.index() == 1;
+        return (*this).index() == 1;
     };
     bool Node::IsMap() const {
-        return value_.index() == 2;
+        return (*this).index() == 2;
     };
     bool Node::IsBool() const {
-        return value_.index() == 3;
+        return (*this).index() == 3;
     };
     bool Node::IsInt() const {
-        return value_.index() == 4;
+        return (*this).index() == 4;
     };
     bool Node::IsPureDouble() const {
-        return value_.index() == 5;
+        return (*this).index() == 5;
     };
     bool Node::IsDouble() const {
-        return value_.index() == 5 || value_.index() == 4;
+        return (*this).index() == 5 || (*this).index() == 4;
     };
     bool Node::IsString() const {
-        return value_.index() == 6;
+        return (*this).index() == 6;
     };
-    
+
     Document::Document(Node root)
         : root_(move(root)) {
     }

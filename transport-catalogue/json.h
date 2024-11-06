@@ -34,20 +34,11 @@ namespace json {
         }
     };
 
-    class Node {
+    class Node : private std::variant<std::nullptr_t, Array, Dict, bool, int, double, std::string> {
     public:
         /* Реализуйте Node, используя std::variant */
+        using variant::variant;
         using Value = std::variant<std::nullptr_t, Array, Dict, bool, int, double, std::string>;
-
-        Node() = default;
-        Node(std::nullptr_t);
-        Node(Array array);
-        Node(Dict map);
-        Node(bool value);
-
-        Node(int value);
-        Node(double value);
-        Node(std::string value);
 
         bool IsNull() const;
         bool IsArray() const;
@@ -65,10 +56,7 @@ namespace json {
         double AsDouble() const;
         const std::string& AsString() const;
 
-        const Value& GetValue() const { return value_; }
-
-    private:
-        Value value_ = nullptr;
+        const Value& GetValue() const { return *this; }
     };
     inline bool operator==(const Node& lhs, const Node& rhs) {
         return lhs.GetValue() == rhs.GetValue();
@@ -83,9 +71,9 @@ namespace json {
 
         const Node& GetRoot() const;
 
-    private:
+    private: 
         Node root_;
-    };
+    }; 
     inline bool operator==(const Document& lhs, const Document& rhs) {
         return lhs.GetRoot() == rhs.GetRoot();
     }

@@ -77,10 +77,10 @@ static void PrintStat(const Array& arr, TrCatalogue& catalogue, const RenderSett
         else if (request_type->second.AsString() == "Stop"s) {
             auto& name = dict.at("name").AsString();
             if (catalogue.FindStop(name)) {
-                std::set<std::string> routes = catalogue.GetRoutesOfStop(name);
+                std::set<std::string_view> routes = catalogue.GetRoutesOfStop(name);
                 Array arr;
                 for (auto& route : routes) {
-                    arr.emplace_back(route);
+                    arr.emplace_back(std::string(route));
                 }
                 result.emplace_back(Dict{
                         {"buses"s, arr },
@@ -152,7 +152,6 @@ void ParseJson(const Document& document, TrCatalogue& catalogue) {
     RenderSettings rs;
     if (const auto& render_settings = root.find("render_settings"s); render_settings != root.end()) {
         rs = ParseRenderSettings(render_settings->second.AsMap());
-        
     }
     if (const auto& stat_requests = root.find("stat_requests"s); stat_requests != root.end()) {
         const Array& arr = stat_requests->second.AsArray();

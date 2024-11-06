@@ -43,7 +43,7 @@ const TransportCatalogue::RouteStat TransportCatalogue::GetRoute(const string& n
     return { route->stops.size(), unordered_set<string_view>(route->stops.begin(), route->stops.end()).size() ,route_distance,  route_distance/ComputeRouteLength(route)};
 }
 
-const set<string> TransportCatalogue::GetRoutesOfStop(const string& name_of_stop) const {
+const set<string_view> TransportCatalogue::GetRoutesOfStop(const string& name_of_stop) const {
     return routes_of_stops_.at(name_of_stop);
 }
 
