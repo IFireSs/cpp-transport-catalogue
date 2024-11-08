@@ -15,7 +15,7 @@ std::deque<geo::Coordinates> MapRenderer::FillCoordinstes(const std::deque<Stop>
     return coordinates;
 }
 
-const geo::Coordinates& MapRenderer::FindCoordinatesOfName(const std::string_view& name){
+const geo::Coordinates& MapRenderer::FindCoordinatesOfName(const std::string_view name){
     return (*std::find_if(stops_.begin(), stops_.end(), [&](const Stop& stop) {return stop.name == name;})).coordinates;
 }
 

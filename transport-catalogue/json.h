@@ -34,13 +34,15 @@ namespace json {
         }
     };
 
-    class Node : private std::variant<std::nullptr_t, Array, Dict, bool, int, double, std::string> {
+    class Node final : private std::variant<std::nullptr_t, Array, Dict, bool, int, double, std::string> {
     public:
         /* Реализуйте Node, используя std::variant */
         using variant::variant;
         using Value = std::variant<std::nullptr_t, Array, Dict, bool, int, double, std::string>;
 
-        bool IsNull() const;
+        Node(Value value) : variant(std::move(value)) {}
+
+        bool IsNull() const; 
         bool IsArray() const;
         bool IsMap() const;
         bool IsBool() const;
@@ -57,6 +59,10 @@ namespace json {
         const std::string& AsString() const;
 
         const Value& GetValue() const { return *this; }
+        
+        Value& GetValue() {
+            return *this;
+        }
     };
     inline bool operator==(const Node& lhs, const Node& rhs) {
         return lhs.GetValue() == rhs.GetValue();

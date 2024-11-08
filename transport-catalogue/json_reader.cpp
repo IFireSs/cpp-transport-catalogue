@@ -1,4 +1,5 @@
 #include "json_reader.h"
+#include "json_builder.h"
 #include <iomanip>
 
 using namespace std::literals;
@@ -49,6 +50,15 @@ static void ParseRoutes(const Array& arr, TrCatalogue& catalogue) {
         }
     }
 }
+json::Node RequestError(int id) {
+    return json::Builder()
+        .StartDict()
+        .Key("request_id"s).Value(id)
+        .Key("error_message"s).Value("not found"s)
+        .EndDict()
+        .Build();
+}
+
 static void PrintStat(const Array& arr, TrCatalogue& catalogue, const RenderSettings& rs) {
     Array result;
     for (const auto& request : arr) {
@@ -59,19 +69,18 @@ static void PrintStat(const Array& arr, TrCatalogue& catalogue, const RenderSett
             auto& name = dict.at("name").AsString();
             if (catalogue.FindRoute(name)) {
                 const auto [count_of_stops, count_of_unique_stops, route_length, curvature] = catalogue.GetRoute(name);
-                result.emplace_back(Dict{
-                        {"curvature"s, curvature},
-                        {"request_id"s, dict.at("id").AsInt()},
-                        {"route_length"s, route_length},
-                        {"stop_count"s, static_cast<int>(count_of_stops)},
-                        {"unique_stop_count"s, static_cast<int>(count_of_unique_stops)}
-                    });
+                result.emplace_back(json::Builder()
+                    .StartDict()
+                    .Key("curvature"s).Value(curvature)
+                    .Key("request_id"s).Value(dict.at("id").AsInt())
+                    .Key("route_length"s).Value(route_length)
+                    .Key("stop_count"s).Value(static_cast<int>(count_of_stops))
+                    .Key("unique_stop_count"s).Value(static_cast<int>(count_of_unique_stops))
+                    .EndDict()
+                    .Build());
             }
             else {
-                result.emplace_back(Dict{
-                        {"request_id"s, dict.at("id").AsInt()},
-                        {"error_message"s, "not found"s},
-                    });
+                result.emplace_back(RequestError(dict.at("id").AsInt()));
             }
         }
         else if (request_type->second.AsString() == "Stop"s) {
@@ -82,24 +91,25 @@ static void PrintStat(const Array& arr, TrCatalogue& catalogue, const RenderSett
                 for (auto& route : routes) {
                     arr.emplace_back(std::string(route));
                 }
-                result.emplace_back(Dict{
-                        {"buses"s, arr },
-                        {"request_id"s, dict.at("id").AsInt()}
-                    });
+                result.emplace_back(json::Builder()
+                            .StartDict()
+                            .Key("buses"s).Value(arr)
+                            .Key("request_id"s).Value(dict.at("id").AsInt())
+                            .EndDict()
+                            .Build());
             }
             else {
-                result.emplace_back(Dict{
-                        {"request_id"s, dict.at("id").AsInt()},
-                        {"error_message"s, "not found"s},
-                    });
+                result.emplace_back(RequestError(dict.at("id").AsInt()));
             }
         }
         else if (request_type->second.AsString() == "Map"s) {
             MapRenderer rndr(rs, catalogue.GetSortedRoutes(), catalogue.GetSortedStops());
-            result.emplace_back(Dict{
-                        {"map"s,  rndr.GetMap()},
-                        {"request_id"s, dict.at("id").AsInt()}
-                });
+            result.emplace_back(json::Builder()
+                .StartDict()
+                .Key("map"s).Value(rndr.GetMap())
+                .Key("request_id"s).Value(dict.at("id").AsInt())
+                .EndDict()
+                .Build());
         }
     }
     Print(Document{ result }, std::cout);

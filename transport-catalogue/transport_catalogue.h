@@ -29,12 +29,12 @@ namespace transport::core {
         std::deque<Route> GetSortedRoutes() const;
         std::deque<Stop> GetSortedStops() const;
         
-        constRoutePtr FindRoute(const std::string_view& name) const;
-        constStopPtr FindStop(const std::string_view& name) const;
-        int FindDistance(const std::string_view& first, const std::string_view& second) const;
+        constRoutePtr FindRoute(const std::string_view name) const;
+        constStopPtr FindStop(const std::string_view name) const;
+        int FindDistance(const std::string_view first, const std::string_view second) const;
 
-        const RouteStat GetRoute(const std::string& name) const;
-        const std::set<std::string_view> GetRoutesOfStop(const std::string& name_of_stop) const;
+        const RouteStat GetRoute(const std::string_view name) const;
+        const std::set<std::string_view> GetRoutesOfStop(const std::string_view name_of_stop) const;
     private:
         using pairConstStopPtr = std::pair<constStopPtr, constStopPtr>;
 

@@ -90,7 +90,7 @@ namespace svg {
         }
         out << "\""sv;
         RenderAttrs(context.out);
-        out << " />"sv;
+        out << "/>"sv;
     }
 
     Text& Text::SetPosition(Point pos) {

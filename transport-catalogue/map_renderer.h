@@ -126,7 +126,7 @@ private:
 
     std::deque<geo::Coordinates> FillCoordinstes(const std::deque<Stop>& stops_);
 
-    const geo::Coordinates& FindCoordinatesOfName(const std::string_view& name);
+    const geo::Coordinates& FindCoordinatesOfName(const std::string_view name);
     const std::string& FindStopOfCoordinates(const geo::Coordinates& coordinates);
 
     const svg::Polyline RenderPoliline(const Route& route, const int& id);
