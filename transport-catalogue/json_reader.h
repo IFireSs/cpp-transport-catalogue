@@ -9,7 +9,3 @@ using TrCatalogue = transport::core::TransportCatalogue;
 json::Document LoadJSON(std::istream& input);
 
 void ParseJson(const json::Document& document, TrCatalogue& catalogue);
-/*
- * Здесь можно разместить код наполнения транспортного справочника данными из JSON,
- * а также код обработки запросов к базе и формирование массива ответов в формате JSON
- */
