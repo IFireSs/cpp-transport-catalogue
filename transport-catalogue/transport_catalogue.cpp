@@ -1,14 +1,13 @@
 #include <algorithm>
 #include <stdexcept>
 #include <unordered_set>
-
 #include "transport_catalogue.h"
 
 using namespace transport::core;
 using namespace std;
 
 void TransportCatalogue::AddRoute(const string& name, const vector<string_view>& stops, const std::string& last_stop) {
-    routes_.emplace_back(move(Route{ name, {stops.begin(),stops.end()}, last_stop }));
+    routes_.emplace_back(move(Route{ name, {stops.begin(),stops.end()}, last_stop}));
     names_of_routes_[routes_.back().name] = &routes_.back();
     for (auto& it : names_of_routes_[routes_.back().name]->stops) {
         routes_of_stops_[it].emplace(routes_.back().name);
@@ -16,7 +15,7 @@ void TransportCatalogue::AddRoute(const string& name, const vector<string_view>&
 }
 
 void TransportCatalogue::AddStop(const string& name, const geo::Coordinates& coordinates) {
-    stops_.emplace_back(move(Stop{ name, coordinates }));
+    stops_.emplace_back(move(Stop{ name, coordinates, stops_.size()}));
     names_of_stops_[stops_.back().name] = &stops_.back();
     routes_of_stops_[stops_.back().name];
 }
@@ -34,7 +33,14 @@ TransportCatalogue::constStopPtr TransportCatalogue::FindStop(const string_view 
 
 int TransportCatalogue::FindDistance(const string_view first, const string_view second) const {
     pairConstStopPtr p(FindStop(first), FindStop(second));
-    return distances_.count(p) ? distances_.at(p) : distances_.at({ p.second, p.first });
+    if (distances_.count(p)) {
+        return distances_.at(p);
+    }
+    pairConstStopPtr sp(FindStop(second), FindStop(first));
+    if (distances_.count(sp)) {
+        return distances_.at(sp);
+    }
+    return 0;
 }
 
 const TransportCatalogue::RouteStat TransportCatalogue::GetRoute(const std::string_view name) const {
@@ -75,3 +81,10 @@ std::deque<Stop> TransportCatalogue::GetSortedStops() const{
     return sorted_stops;
 }
 
+const std::deque<Route>& TransportCatalogue::GetAllBuses() const {
+    return routes_;
+}
+
+size_t TransportCatalogue::GetStopsCount() const {
+    return  stops_.size();
+}

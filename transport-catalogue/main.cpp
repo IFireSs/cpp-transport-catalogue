@@ -5,4 +5,5 @@ using namespace std;
 int main() {
     transport::core::TransportCatalogue catalogue; 
     ParseJson(LoadJSON(cin), catalogue); 
+
 }

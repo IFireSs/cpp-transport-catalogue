@@ -1,9 +1,9 @@
 #include "json_reader.h"
 #include "json_builder.h"
-#include <iomanip>
-
 using namespace std::literals;
 using namespace json;
+
+const double EPS_TO_CONVERT_VELOCITY = 1000./60.;
 
 Document LoadJSON(std::istream& input) {
     return Load(input);
@@ -46,7 +46,6 @@ static void ParseRoutes(const Array& arr, TrCatalogue& catalogue) {
             else {
                 catalogue.AddRoute(dict.at("name"s).AsString(), stops, std::string(stops.back()));
             }
-            
         }
     }
 }
@@ -59,7 +58,13 @@ json::Node RequestError(int id) {
         .Build();
 }
 
-static void PrintStat(const Array& arr, TrCatalogue& catalogue, const RenderSettings& rs) {
+static void PrintStat(const Array& arr
+    , const TrCatalogue& catalogue
+    , const RenderSettings& rs
+    , const RoutingSettings& routing_settings
+    , const Transport_router& transport_router) {
+
+
     Array result;
     for (const auto& request : arr) {
         const auto& dict = request.AsMap();
@@ -111,6 +116,49 @@ static void PrintStat(const Array& arr, TrCatalogue& catalogue, const RenderSett
                 .EndDict()
                 .Build());
         }
+        else if (request_type->second.AsString() == "Route"s) {
+            const auto from_it = dict.find("from"s);
+            const auto to_it = dict.find("to"s);
+            
+            if (from_it != dict.end() && to_it != dict.end()) {
+                auto route_stat = transport_router.GetOptimalRoute(from_it->second.AsString(), to_it->second.AsString());
+                if (route_stat == std::nullopt) {
+                    result.emplace_back(RequestError(dict.at("id").AsInt()));
+                    continue;
+                }
+
+                Array arr;
+                for (const auto& item : route_stat.value().items) {
+                    arr.emplace_back(json::Builder()
+                        .StartDict()
+                        .Key("type"s).Value("Wait"s)
+                        .Key("stop_name"s).Value(item.stop->name)
+                        .Key("time"s).Value(routing_settings.bus_wait_time)
+                        .EndDict().Build());
+                    
+                    arr.emplace_back(json::Builder()
+                        .StartDict()
+                        .Key("type"s).Value("Bus"s)
+                        .Key("bus"s).Value(item.bus->name)
+                        .Key("span_count"s).Value(item.span_count)
+                        .Key("time"s).Value(item.time)
+                        .EndDict().Build());
+                    
+                }
+
+                result.emplace_back(json::Builder()
+                    .StartDict()
+                    .Key("request_id"s).Value(dict.at("id").AsInt())
+                    .Key("total_time"s)
+                    .Value(route_stat.value().total_time)
+                    .Key("items"s).Value(std::move(arr))
+                    .EndDict()
+                    .Build());
+            }
+            else {
+                result.emplace_back(RequestError(dict.at("id").AsInt()));
+            }
+        }
     }
     Print(Document{ result }, std::cout);
 }
@@ -151,6 +199,13 @@ static RenderSettings ParseRenderSettings(const Dict& dict) {
     return render_settings;
 }
 
+static RoutingSettings ParseRoutingSettings(const Dict& dict) {
+    RoutingSettings routing_settings;
+    routing_settings.bus_wait_time = dict.at("bus_wait_time"s).AsInt();
+    routing_settings.bus_velocity = dict.at("bus_velocity"s).AsDouble() * EPS_TO_CONVERT_VELOCITY;
+    return routing_settings;
+}
+
 void ParseJson(const Document& document, TrCatalogue& catalogue) { 
     const Dict& root  = document.GetRoot().AsMap();
     if (const auto& base_requests = root.find("base_requests"s); base_requests != root.end()) {
@@ -159,14 +214,20 @@ void ParseJson(const Document& document, TrCatalogue& catalogue) {
         ParseDistances(arr, catalogue);
         ParseRoutes(arr, catalogue);
     }
-    RenderSettings rs;
-    if (const auto& render_settings = root.find("render_settings"s); render_settings != root.end()) {
-        rs = ParseRenderSettings(render_settings->second.AsMap());
+    RenderSettings render_settings;
+    if (const auto& settings = root.find("render_settings"s); settings != root.end()) {
+        render_settings = ParseRenderSettings(settings->second.AsMap());
     }
+    RoutingSettings routing_settings;
+    if (const auto& settings = root.find("routing_settings"s); settings != root.end()) {
+        routing_settings = ParseRoutingSettings(settings->second.AsMap());
+    }
+    Transport_router transport_router(catalogue, routing_settings);
+
     if (const auto& stat_requests = root.find("stat_requests"s); stat_requests != root.end()) {
         const Array& arr = stat_requests->second.AsArray();
         if (!arr.empty()) {
-            PrintStat(arr, catalogue, rs);
+            PrintStat(arr, catalogue, render_settings, routing_settings, transport_router);
         }
     }
 }

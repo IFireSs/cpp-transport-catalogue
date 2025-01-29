@@ -35,6 +35,8 @@ namespace transport::core {
 
         const RouteStat GetRoute(const std::string_view name) const;
         const std::set<std::string_view> GetRoutesOfStop(const std::string_view name_of_stop) const;
+        const std::deque<Route>& GetAllBuses() const;
+        size_t GetStopsCount() const;
     private:
         using pairConstStopPtr = std::pair<constStopPtr, constStopPtr>;
 

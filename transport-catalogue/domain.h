@@ -10,4 +10,5 @@ struct Route {
 struct Stop {
     std::string name;
     geo::Coordinates coordinates;
+    size_t idx = 0;
 };
